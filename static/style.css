@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+*{font-family:'Poppins',sans-serif;}
+body{
+  background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+  min-height:100vh;
+}
+.glass{
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border-radius:20px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.1);
+}
+.btn-lively{
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  color:white;
+  border:none;
+  padding:12px 25px;
+  border-radius:30px;
+  font-weight:600;
+  transition:0.3s;
+}
+.btn-lively:hover{transform:scale(1.05);box-shadow:0 5px 15px rgba(102,126,234,0.4);}
+.card-stat{
+  background:white;
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.08);
+  transition:0.3s;
+}
+.card-stat:hover{transform:translateY(-5px);}
+.qr-scanner{
+  border:4px dashed #667eea;
+  border-radius:20px;
+  padding:20px;
+  background:rgba(102,126,234,0.05);
+}
+.status-success{border-left:5px solid #00c853;background:#e8f5e9;}
+.status-owing{border-left:5px solid #ffab00;background:#fff8e1;}
+.status-blocked{border-left:5px solid #d50000;background:#ffebee;animation:shake 0.5s;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
