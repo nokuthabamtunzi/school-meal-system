@@ -1,34 +1,46 @@
-<!DOCTYPE html><html><head><title>Scanner</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><script src="https://unpkg.com/html5-qrcode"></script>
-<style>body{font-family:Arial;background:#f4f6f9;margin:0;padding:5px}.card{background:white;max-width:600px;margin:10px auto;padding:15px;border-radius:12px;text-align:center}.nav{background:#004080;color:white;padding:7px 10px;border-radius:6px;text-decoration:none;font-size:12px;margin:2px;display:inline-block}#reader{width:100%;border-radius:12px}.ok{background:#d4edda;padding:12px;border-radius:8px;margin-top:10px;font-weight:bold}.bad{background:#f8d7da;padding:12px;border-radius:8px;margin-top:10px;font-weight:bold}.warn{background:#fff3cd;padding:12px;border-radius:8px;margin-top:10px;font-weight:bold}button.meal{padding:12px;margin:5px;border:none;border-radius:8px;color:white;font-weight:bold;cursor:pointer;width:28%}</style></head><body><div class="card">
-<a href="/register" class="nav">Register</a><a href="/dashboard" class="nav">Dashboard</a><a href="/report" class="nav">Report</a><a href="/settings" class="nav" style="background:#ff9800">⚙️ Settings</a><a href="/logout" class="nav" style="background:gray">Logout</a>
-<h3>🍽️ Meal Scanner - Fee ${{settings.fee}} Exp {{settings.expiry}}d</h3>
-<div><button class="meal" style="background:#ff9800" onclick="setMeal('Breakfast')">Breakfast</button><button class="meal" style="background:#28a745" onclick="setMeal('Lunch')">Lunch</button><button class="meal" style="background:#6f42c1" onclick="setMeal('Supper')">Supper</button></div>
-<p>Meal: <b id="mealType">Breakfast</b></p>
-<div id="reader"></div>
-<div id="result"></div>
-<p style="font-size:11px;color:#555">Block: {% if settings.block_unpaid==1 %}ON (Min {{settings.allow_partial}}% paid){% else %}OFF{% endif %}</p>
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="glass p-4 text-center">
+      <h2 class="fw-bold mb-3">📷 Meal Scanner</h2>
+      <div class="qr-scanner mb-3">
+        <video id="video" width="100%" autoplay style="border-radius:15px;"></video>
+      </div>
+      <select id="meal_type" class="form-select mb-3" style="border-radius:30px;">
+        <option value="breakfast">🌅 Breakfast</option>
+        <option value="lunch">☀️ Lunch</option>
+        <option value="supper">🌙 Supper</option>
+      </select>
+      <div id="result" class="p-3 rounded-4 mt-3" style="display:none;"></div>
+      <audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+    </div>
+  </div>
 </div>
+<script src="https://unpkg.com/html5-qrcode"></script>
 <script>
-let currentMeal='Breakfast';
-function setMeal(m){currentMeal=m;document.getElementById('mealType').innerText=m;}
-function onScanSuccess(decodedText){
- let adm=decodedText.includes(':')?decodedText.split(':')[1]:decodedText;
- fetch('/mark_attendance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({admission_no:adm,meal_type:currentMeal})})
-.then(r=>r.json()).then(d=>{
-  let el=document.getElementById('result');
-  if(d.status==='not_found'){el.className='bad';el.innerHTML='❌ Not Found '+adm;}
-  else if(d.status==='blocked'){el.className='bad';el.innerHTML=`⛔ BLOCKED<br>${d.name}<br>Owing $${d.amount_owed} / Fee $${d.monthly_fee}<br>No meal - Paid less than {{settings.allow_partial}}%`; alert(`⛔ BLOCKED - NO MEAL\n${d.name}\nOwing $${d.amount_owed}`);}
-  else if(d.status==='already_marked'){el.className='warn';el.innerHTML=`⚠️ Already marked today<br>${d.name}<br>Paid until ${d.due_date}`;}
-  else if(d.status==='already_marked_owing'){el.className='bad';el.innerHTML=`⚠️ Already marked but OWING<br>${d.name}<br>Owing $${d.amount_owed} Due ${d.due_date}`;}
-  else if(d.status==='success'){el.className='ok';el.innerHTML=`✅ FOOD SAVED<br>${d.name}<br>Valid until ${d.due_date} (${d.days_left} days left)`;}
-  else if(d.status==='expiring_soon'){el.className='warn';el.innerHTML=`⚠️ Expiring in ${d.days_left} days<br>${d.name}<br>Due ${d.due_date}`;}
-  else if(d.status==='expired_today'){el.className='warn';el.innerHTML=`⚠️ Expires TODAY<br>${d.name}<br>Due ${d.due_date} - Renew now`;}
-  else if(d.status==='expired_cleared'){el.className='bad';el.innerHTML=`❌ EXPIRED<br>${d.name}<br>Was due ${d.due_date} - Now owing fee`;}
-  else if(d.status==='owing'){el.className='bad';el.innerHTML=`❌ OWING<br>${d.name}<br>Owing $${d.amount_owed} Due ${d.due_date} (${d.days_left} days left)`;}
-  else if(d.status==='expired_owing'){el.className='bad';el.innerHTML=`❌ EXPIRED & OWING<br>${d.name}<br>Owing $${d.amount_owed} - Was due ${d.due_date}`;}
-  else if(d.status==='expired_today_owing'){el.className='bad';el.innerHTML=`❌ EXPIRES TODAY & OWING<br>${d.name}<br>Owing $${d.amount_owed} Due ${d.due_date}`;}
- });
+let lastScan="";
+function showRes(data){
+  const el=document.getElementById('result');
+  el.style.display='block';
+  document.getElementById('beep').play();
+  if(data.status=='success'){
+    el.className='status-success p-3 rounded-4'; el.innerHTML=`<h4>✅ ${data.name}</h4><p>Due: ${data.due_date} | ${data.days_left} days left</p>`;
+  } else if(data.status=='blocked'){
+    el.className='status-blocked p-3 rounded-4'; el.innerHTML=`<h4>🚫 BLOCKED ${data.name}</h4><p>Owes $${data.amount_owed} - Need 50% payment</p><p>Fee $${data.monthly_fee}</p>`;
+  } else if(data.status.includes('owing')){
+    el.className='status-owing p-3 rounded-4'; el.innerHTML=`<h4>⚠️ ${data.name}</h4><p>Owes $${data.amount_owed} but allowed</p><p>Due: ${data.due_date}</p>`;
+  } else if(data.status=='already_marked'){
+    el.className='p-3 rounded-4 bg-light'; el.innerHTML=`<h4>Already Scanned ✅</h4><p>${data.name}</p>`;
+  } else { el.innerHTML=`<p>${data.status} ${data.name||''}</p>`; }
 }
-let html5QrcodeScanner=new Html5QrcodeScanner("reader",{fps:10,qrbox:250});
-html5QrcodeScanner.render(onScanSuccess);
-</script></body></html>
+function onScanSuccess(decoded){
+  if(decoded==lastScan) return;
+  lastScan=decoded; setTimeout(()=>lastScan="",3000);
+  let adm=decoded.replace('SCHOOL:','').trim();
+  fetch('/mark_attendance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({admission_no:adm,meal_type:document.getElementById('meal_type').value})})
+ .then(r=>r.json()).then(showRes);
+}
+const html5Qr=new Html5Qrcode("video"); Html5Qrcode.getCameras().then(c=>{if(c.length){html5Qr.start(c[0].id,{fps:10,qrbox:250},onScanSuccess);}});
+</script>
+{% endblock %}
