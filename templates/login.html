@@ -1,0 +1,11 @@
+<!DOCTYPE html><html><head><title>Login - School Meals</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>body{font-family:Arial;background:#004080;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}.card{background:white;padding:25px;border-radius:12px;width:95%;max-width:350px}input,button{width:100%;padding:10px;margin:7px 0;border-radius:8px;border:1px solid #ccc}button{background:#004080;color:white;font-weight:bold;cursor:pointer}a{font-size:12px;text-align:center;display:block;margin-top:10px}</style></head><body>
+<div class="card">
+<h2 style="text-align:center;color:#004080">🍽️ School Meals Login</h2>
+{% with m=get_flashed_messages() %}{% if m %}<p style="color:red;text-align:center;font-size:13px">{{m[0]}}</p>{% endif %}{% endwith %}
+<form method="POST">
+<input name="username" placeholder="Username" required>
+<input name="password" type="password" placeholder="Password" required>
+<button>Login</button>
+</form>
+</div></body></html>

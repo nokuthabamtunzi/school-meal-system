@@ -1,0 +1,34 @@
+<!DOCTYPE html><html><head><title>Scanner</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><script src="https://unpkg.com/html5-qrcode"></script>
+<style>body{font-family:Arial;background:#f4f6f9;margin:0;padding:5px}.card{background:white;max-width:600px;margin:10px auto;padding:15px;border-radius:12px;text-align:center}.nav{background:#004080;color:white;padding:7px 10px;border-radius:6px;text-decoration:none;font-size:12px;margin:2px;display:inline-block}#reader{width:100%;border-radius:12px}.ok{background:#d4edda;padding:12px;border-radius:8px;margin-top:10px;font-weight:bold}.bad{background:#f8d7da;padding:12px;border-radius:8px;margin-top:10px;font-weight:bold}.warn{background:#fff3cd;padding:12px;border-radius:8px;margin-top:10px;font-weight:bold}button.meal{padding:12px;margin:5px;border:none;border-radius:8px;color:white;font-weight:bold;cursor:pointer;width:28%}</style></head><body><div class="card">
+<a href="/register" class="nav">Register</a><a href="/dashboard" class="nav">Dashboard</a><a href="/report" class="nav">Report</a><a href="/settings" class="nav" style="background:#ff9800">⚙️ Settings</a><a href="/logout" class="nav" style="background:gray">Logout</a>
+<h3>🍽️ Meal Scanner - Fee ${{settings.fee}} Exp {{settings.expiry}}d</h3>
+<div><button class="meal" style="background:#ff9800" onclick="setMeal('Breakfast')">Breakfast</button><button class="meal" style="background:#28a745" onclick="setMeal('Lunch')">Lunch</button><button class="meal" style="background:#6f42c1" onclick="setMeal('Supper')">Supper</button></div>
+<p>Meal: <b id="mealType">Breakfast</b></p>
+<div id="reader"></div>
+<div id="result"></div>
+<p style="font-size:11px;color:#555">Block: {% if settings.block_unpaid==1 %}ON (Min {{settings.allow_partial}}% paid){% else %}OFF{% endif %}</p>
+</div>
+<script>
+let currentMeal='Breakfast';
+function setMeal(m){currentMeal=m;document.getElementById('mealType').innerText=m;}
+function onScanSuccess(decodedText){
+ let adm=decodedText.includes(':')?decodedText.split(':')[1]:decodedText;
+ fetch('/mark_attendance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({admission_no:adm,meal_type:currentMeal})})
+.then(r=>r.json()).then(d=>{
+  let el=document.getElementById('result');
+  if(d.status==='not_found'){el.className='bad';el.innerHTML='❌ Not Found '+adm;}
+  else if(d.status==='blocked'){el.className='bad';el.innerHTML=`⛔ BLOCKED<br>${d.name}<br>Owing $${d.amount_owed} / Fee $${d.monthly_fee}<br>No meal - Paid less than {{settings.allow_partial}}%`; alert(`⛔ BLOCKED - NO MEAL\n${d.name}\nOwing $${d.amount_owed}`);}
+  else if(d.status==='already_marked'){el.className='warn';el.innerHTML=`⚠️ Already marked today<br>${d.name}<br>Paid until ${d.due_date}`;}
+  else if(d.status==='already_marked_owing'){el.className='bad';el.innerHTML=`⚠️ Already marked but OWING<br>${d.name}<br>Owing $${d.amount_owed} Due ${d.due_date}`;}
+  else if(d.status==='success'){el.className='ok';el.innerHTML=`✅ FOOD SAVED<br>${d.name}<br>Valid until ${d.due_date} (${d.days_left} days left)`;}
+  else if(d.status==='expiring_soon'){el.className='warn';el.innerHTML=`⚠️ Expiring in ${d.days_left} days<br>${d.name}<br>Due ${d.due_date}`;}
+  else if(d.status==='expired_today'){el.className='warn';el.innerHTML=`⚠️ Expires TODAY<br>${d.name}<br>Due ${d.due_date} - Renew now`;}
+  else if(d.status==='expired_cleared'){el.className='bad';el.innerHTML=`❌ EXPIRED<br>${d.name}<br>Was due ${d.due_date} - Now owing fee`;}
+  else if(d.status==='owing'){el.className='bad';el.innerHTML=`❌ OWING<br>${d.name}<br>Owing $${d.amount_owed} Due ${d.due_date} (${d.days_left} days left)`;}
+  else if(d.status==='expired_owing'){el.className='bad';el.innerHTML=`❌ EXPIRED & OWING<br>${d.name}<br>Owing $${d.amount_owed} - Was due ${d.due_date}`;}
+  else if(d.status==='expired_today_owing'){el.className='bad';el.innerHTML=`❌ EXPIRES TODAY & OWING<br>${d.name}<br>Owing $${d.amount_owed} Due ${d.due_date}`;}
+ });
+}
+let html5QrcodeScanner=new Html5QrcodeScanner("reader",{fps:10,qrbox:250});
+html5QrcodeScanner.render(onScanSuccess);
+</script></body></html>

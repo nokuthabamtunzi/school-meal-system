@@ -1,0 +1,12 @@
+<!DOCTYPE html><html><head><title>Report</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>body{font-family:Arial;background:#f4f6f9;margin:0;padding:5px}.card{background:white;width:98%;max-width:1000px;margin:5px auto;padding:10px;border-radius:10px}.nav{background:#004080;color:white;padding:7px 10px;border-radius:6px;text-decoration:none;font-size:12px;margin:2px;display:inline-block}table{width:100%;border-collapse:collapse;font-size:11px}th{background:#004080;color:white;padding:5px}td{padding:4px;border-bottom:1px solid #ddd}</style></head><body><div class="card">
+<a href="/scan" class="nav">Scanner</a><a href="/register" class="nav">Register</a><a href="/dashboard" class="nav">Dashboard</a><a href="/settings" class="nav" style="background:#ff9800">Settings</a>
+{% if role=='admin' %}<a href="/clear_attendance" class="nav" style="background:red" onclick="return confirm('Delete all?')">Clear All</a>{% endif %}
+<h3>📋 Meal Report</h3>
+{% for date in sorted_dates %}
+<h4 style="background:#eef;padding:6px;border-radius:6px">{{date}} - {{grouped[date]|length}} meals {% if role=='admin' %}<a href="/clear_attendance_date/{{date}}" style="color:red;font-size:10px;margin-left:10px" onclick="return confirm('Delete {{date}}?')">🗑️ Delete day</a>{% endif %}</h4>
+<table><tr><th>Name</th><th>Cls</th><th>Adm</th><th>Meal</th><th>Time</th><th>Owing</th><th>Due</th><th>Del</th></tr>
+{% for r in grouped[date] %}<tr><td>{{r[1]}}</td><td>{{r[2]}}</td><td>{{r[3]}}</td><td>{{r[4]}}</td><td>{{r[5]}}</td><td>${{r[6]}}</td><td>{{r[7]}}</td><td>{% if role=='admin' %}<a href="/delete_one_scan/{{r[0]}}" style="color:red">X</a>{% endif %}</td></tr>{% endfor %}
+</table>
+{% endfor %}
+</div></body></html>

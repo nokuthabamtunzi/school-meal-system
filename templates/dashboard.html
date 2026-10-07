@@ -1,0 +1,9 @@
+<!DOCTYPE html><html><head><title>Dashboard</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>body{font-family:Arial;background:#f4f6f9;margin:0;padding:10px}.card{background:white;max-width:800px;margin:20px auto;padding:20px;border-radius:12px}.nav{background:#004080;color:white;padding:7px 10px;border-radius:6px;text-decoration:none;font-size:12px;margin:2px;display:inline-block}.box{display:inline-block;width:30%;padding:15px;margin:5px;border-radius:10px;color:white;text-align:center}.b1{background:#28a745}.b2{background:#007bff}.b3{background:#dc3545}</style></head><body><div class="card">
+<a href="/scan" class="nav">Scanner</a><a href="/register" class="nav">Register</a><a href="/report" class="nav">Report</a><a href="/settings" class="nav" style="background:#ff9800">Settings</a>
+<h2>📊 Dashboard</h2>
+<div class="box b1">Present Today<br><b style="font-size:24px">{{present}}</b></div>
+<div class="box b2">Total Students<br><b style="font-size:24px">{{total}}</b></div>
+<div class="box b3">Total Owing<br><b style="font-size:24px">${{debt}}</b></div>
+<p style="font-size:12px;margin-top:15px;background:#eef;padding:10px;border-radius:8px">Fee: ${{settings.fee}} | Expiry: {{settings.expiry}} days | Block: {{settings.block_unpaid}} | Min Paid: {{settings.allow_partial}}%</p>
+</div></body></html>

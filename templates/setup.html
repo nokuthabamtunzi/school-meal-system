@@ -1,0 +1,17 @@
+<!DOCTYPE html><html><head><title>First Time Setup</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>body{font-family:Arial;background:#004080;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:10px}.card{background:white;padding:20px;border-radius:12px;max-width:450px;width:100%}input,button{width:100%;padding:10px;margin:6px 0;border-radius:8px;border:1px solid #ccc}button{background:#004080;color:white;font-weight:bold}label{font-size:12px;font-weight:bold}small{font-size:10px;color:#666}</style></head><body>
+<div class="card">
+<h2 style="text-align:center;color:#004080">🔧 FIRST TIME SETUP</h2><p style="text-align:center;font-size:12px">Create Admin & Set Rules</p>
+<form method="POST">
+<label>Admin Username</label><input name="username" required placeholder="e.g. admin">
+<label>Admin Password</label><input name="password" type="password" required>
+<hr>
+<label>Monthly Fee Default ($)</label><input name="monthly_fee" type="number" value="95" required>
+<label>Funds Expire After (days)</label><input name="expiry_days" type="number" value="30" required>
+<label>Allow meal if NOT fully paid?</label><div style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="allow_unpaid" checked style="width:20px"><small>Allow with warning</small></div>
+<label>Allow if paid at least (%)</label><input name="allow_partial" type="number" value="50" min="0" max="100">
+<small>50 means if paid half, allow. If less than this %, block if block ON.</small><br><br>
+<label style="color:red">🔴 BLOCK unpaid completely?</label><div style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="block_unpaid" style="width:20px"><small>If ticked, owing > allowed % = NO MEAL</small></div>
+<button>Create Account & Save</button>
+</form>
+</div></body></html>

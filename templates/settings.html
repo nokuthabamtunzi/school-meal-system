@@ -1,0 +1,15 @@
+<!DOCTYPE html><html><head><title>Settings</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>body{font-family:Arial;background:#f4f6f9;margin:0;padding:10px}.card{background:white;max-width:500px;margin:20px auto;padding:20px;border-radius:12px}.nav{background:#004080;color:white;padding:7px 10px;border-radius:6px;text-decoration:none;font-size:12px;margin:2px;display:inline-block}input{padding:9px;width:100%;margin:6px 0;border-radius:6px;border:1px solid #ccc}button{width:100%;padding:10px;background:#28a745;color:white;border:none;border-radius:8px;font-weight:bold}label{font-weight:bold;font-size:13px}</style></head><body><div class="card">
+<a href="/scan" class="nav">Scanner</a><a href="/register" class="nav">Register</a><a href="/dashboard" class="nav">Dashboard</a>
+<h2>⚙️ Account Settings</h2>
+{% with m=get_flashed_messages() %}{% if m %}<p style="color:green">{{m[0]}}</p>{% endif %}{% endwith %}
+<form method="POST">
+<label>Monthly Fee Default</label><input name="monthly_fee" type="number" value="{{s.fee}}" required>
+<label>Funds Expire After (Days)</label><input name="expiry_days" type="number" value="{{s.expiry}}" required>
+<label>Allow meal if not fully paid?</label><br><input type="checkbox" name="allow_unpaid" {% if s.allow_unpaid==1 %}checked{% endif %} style="width:20px"> Allow with warning<br>
+<label>Allow if paid at least (%)</label><input name="allow_partial" type="number" value="{{s.allow_partial}}" min="0" max="100">
+<label style="color:red">BLOCK unpaid?</label><br><input type="checkbox" name="block_unpaid" {% if s.block_unpaid==1 %}checked{% endif %} style="width:20px"> Yes block them<br><br>
+<button>Save Settings</button>
+</form>
+<div style="margin-top:15px;background:#eef;padding:10px;border-radius:8px;font-size:12px">Current: Fee ${{s.fee}} | Expire {{s.expiry}} days | Allow: {{s.allow_unpaid}} | Min %: {{s.allow_partial}} | Block: {{s.block_unpaid}}</div>
+</div></body></html>
